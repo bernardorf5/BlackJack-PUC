@@ -120,14 +120,6 @@ Dificuldades previstas:
 
 ## 14. Escopo mínimo para a entrega final
 
-Descreva qual será a versão mínima aceitável do jogo.
-
-Esta seção é importante para evitar que o grupo escolha uma ideia grande demais.
-
-Exemplo:
-
-> A versão mínima do jogo terá um personagem controlado pelo teclado, obstáculos aparecendo na tela, sistema de vidas, sistema de pontuação e tela de fim de jogo.
-
 Escopo mínimo:
 
 > A versão mínima do jogo terá: baralho embaralhado e distribuição de cartas, ações de Hit e Stand implementadas, lógica do dealer, lógica do Às, verificação e exibição do resultado de cada rodada (vitória, derrota ou empate) e sistema de fichas.
