@@ -6,6 +6,9 @@ from src.config import (
     FPS,
     TITULO_JOGO,
     CINZA,
+    BRANCO,
+    VERDE_MESA,
+    AMARELO,
     CAMINHO_RECORDE,
     CAMINHO_SPRITES,
 )
@@ -32,6 +35,12 @@ def executar_jogo():
     tela = pygame.display.set_mode((LARGURA_TELA, ALTURA_TELA))
     pygame.display.set_caption(TITULO_JOGO)
 
+    pygame.font.init() #O pygame não carrega fontes automaticamente, então a gente tem que inicializar a fonte
+    fonte_grande = pygame.font.SysFont("Arial", 64) 
+    fonte_media  = pygame.font.SysFont("Arial", 32)
+
+    estado = "menu"
+    
     relogio = pygame.time.Clock()
     rodando = True
 
@@ -62,6 +71,9 @@ def executar_jogo():
         "imagem": bat_image,
         "rect": bat_image.get_rect(topleft=(200, 500))
     }
+    carta = {
+        "rect": pygame.Rect(LARGURA_TELA//2, ALTURA_TELA//2, 60, 90) # Temporário
+    }
 
     velocidade = 5
     pontos = 0
@@ -75,22 +87,26 @@ def executar_jogo():
         for evento in pygame.event.get():
             if evento.type == pygame.QUIT:
                 rodando = False
+            if evento.type == pygame.KEYDOWN:
+                if estado == "menu":
+                    if evento.key == pygame.K_RETURN:
+                        estado = "jogo"
 
         teclas = pygame.key.get_pressed()
 
-        # Movimentação alterando direto os eixos X e Y do retângulo do jogador
-        if teclas[pygame.K_LEFT]:
-            jogador["rect"].x -= velocidade
-        if teclas[pygame.K_RIGHT]:
-            jogador["rect"].x += velocidade
-        if teclas[pygame.K_UP]:
-            jogador["rect"].y -= velocidade
-        if teclas[pygame.K_DOWN]:
-            jogador["rect"].y += velocidade
-
-        # Limitando o jogador dentro das bordas da tela usando as propriedades do Rect
-        jogador["rect"].x = limitar_valor(jogador["rect"].x, 0, LARGURA_TELA - jogador["rect"].width)
-        jogador["rect"].y = limitar_valor(jogador["rect"].y, 0, ALTURA_TELA - jogador["rect"].height)
+        # Movimentação alterando direto os eixos X e Y do retângulo da carta
+        if estado == "jogo":
+            if teclas[pygame.K_LEFT]:
+                carta["rect"].x -= velocidade
+            if teclas[pygame.K_RIGHT]:
+                carta["rect"].x += velocidade
+            if teclas[pygame.K_UP]:
+                carta["rect"].y -= velocidade
+            if teclas[pygame.K_DOWN]:
+                carta["rect"].y += velocidade
+        # Limitando a carta dentro das bordas da tela usando as propriedades do Rect
+        carta["rect"].x = limitar_valor(carta["rect"].x, 0, LARGURA_TELA - carta["rect"].width)
+        carta["rect"].y = limitar_valor(carta["rect"].y, 0, ALTURA_TELA - carta["rect"].height)
 
         # Verificação de colisão com a Gema (antigo 'item')
         if verificar_colisao(jogador["rect"], gema["rect"]):
@@ -128,15 +144,22 @@ def executar_jogo():
             salvar_recorde(CAMINHO_RECORDE, recorde)
 
         pygame.display.set_caption(
-            f"{TITULO_JOGO} | Pontos: {pontos} | Recorde: {recorde} | Vidas: {vidas}"
+            f"{TITULO_JOGO}"
         )
 
-        tela.fill(CINZA)
+        if estado == "menu": # Vai ver se o jogo está no menu ainda, se estiver ele vai colar o título e a instrução para o jogador entrar no jogo
+            tela.fill((VERDE_MESA))
+            titulo = fonte_grande.render("BlackJack", True, (AMARELO))
+            instrucao = fonte_media.render("Pressione ENTER para jogar", True, (BRANCO))
+            tela.blit(titulo, titulo.get_rect(center=(LARGURA_TELA//2, 200))) # Utilizar // em vez de / porque o pygame só recebe valor inteiro
+            tela.blit(instrucao, instrucao.get_rect(center=(LARGURA_TELA//2, 350))) # Utilizar // em vez de / porque o pygame só recebe valor inteiro
+            # O blit é como se fosse vc colasse figuras uma em cima da outra, então nesse caso você cola em cima da tela o título e a instrução
 
-        # Desenhando os elementos na tela passando a imagem e o rect de cada dicionário
-        tela.blit(gema["imagem"], gema["rect"])
-        tela.blit(inimigo["imagem"], inimigo["rect"])
-        tela.blit(jogador["imagem"], jogador["rect"])
+        elif estado == "jogo": # Vai ver se o jogo agora saiu do menu e foi para a tela de jogar, se estiver ele vai colar na tela só o texto padrão que deixamos
+            tela.fill((VERDE_MESA))
+            pygame.draw.rect(tela, BRANCO, carta["rect"])
+            texto = fonte_media.render("MESA DE JOGO", True, (BRANCO))
+            tela.blit(texto, texto.get_rect(center=(LARGURA_TELA//2, ALTURA_TELA//2)))
 
         pygame.display.flip()
 
